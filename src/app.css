@@ -1,0 +1,27 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@media (min-width: 30em) {
+    html {
+        font-size: 125%;
+    }
+}
+
+@media (min-width: 40em) {
+    html {
+        font-size: 150%;
+    }
+}
+
+@media (min-width: 50em) {
+    html {
+        font-size: 175%;
+    }
+}
+
+@media (min-width: 60em) {
+    html {
+        font-size: 200%;
+    }
+}
