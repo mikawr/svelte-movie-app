@@ -84,7 +84,7 @@
 
 <style>
     .error-message {
-        color: tomato;
+        color: #FFF;
         flex: 0 0 100%;
         margin: 0 2px;
         font-size: 0.8em;

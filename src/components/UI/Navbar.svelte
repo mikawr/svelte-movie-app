@@ -4,8 +4,8 @@
             class="nav relative text-base-100 flex flex-col flex-wrap md:flex-row md:[&>li]:px-2"
         >
             <li><a href="/">Home</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/products">Products</a></li>
+            <li><a href="/movies">Movies</a></li>
+            <li><a href="/members">Members</a></li>
             <li><a href="/contact">Contact</a></li>
         </ul>
     </div>

@@ -1,6 +1,6 @@
 <div
     class="hero min-h-screen"
-    style="background-image: url(http://www.officialpsds.com/images/stocks/Movie-Theater-stock1947.jpg);"
+    style="background-image: url(src/lib/assets/images/cinema.png);"
 >
     <div class="hero-overlay bg-opacity-60" />
     <div class="hero-content text-center text-neutral-content">
