@@ -6,7 +6,6 @@
             <li><a href="/">Home</a></li>
             <li><a href="/movies">Movies</a></li>
             <li><a href="/members">Members</a></li>
-            <li><a href="/contact">Contact</a></li>
         </ul>
     </div>
 
