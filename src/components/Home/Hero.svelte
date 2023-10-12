@@ -5,8 +5,8 @@
     <div class="hero-overlay bg-opacity-60" />
     <div class="hero-content text-center text-neutral-content">
         <div class="max-w-md">
-            <h1 class="mb-5 text-5xl font-bold">Movie King</h1>
-            <p class="mb-5">Movies, TV shows, reviews, ratings, and more.</p>
+            <h1 class="mb-5 text-white text-5xl font-bold">Movie King</h1>
+            <p class="mb-5 text-white whitespace-nowrap overflow-hidden">Movies, TV shows, reviews, ratings, and more.</p>
         </div>
     </div>
 </div>
@@ -14,10 +14,7 @@
 <style>
     p {
         border-right: solid 3px #fff;
-        white-space: nowrap;
-        overflow: hidden;
         font-size: 28px;
-        color: rgba(255, 255, 255, 0.7);
     }
 
     /* Animation */
