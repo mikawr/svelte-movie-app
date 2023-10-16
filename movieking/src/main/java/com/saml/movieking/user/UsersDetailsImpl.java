@@ -14,7 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Getter
-public class UserDetailsImpl implements UserDetails {
+public class UsersDetailsImpl implements UserDetails {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -29,8 +29,8 @@ public class UserDetailsImpl implements UserDetails {
 
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetailsImpl(Long id, String username, String email, String password,
-                           Collection<? extends GrantedAuthority> authorities) {
+    public UsersDetailsImpl(Long id, String username, String email, String password,
+                            Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -38,14 +38,12 @@ public class UserDetailsImpl implements UserDetails {
         this.authorities = authorities;
     }
 
-    public static UserDetailsImpl build(Users user) {
-        List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName().name()))
-                .collect(Collectors.toList());
+    public static UsersDetailsImpl build(Users user) {
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("MEMBER"));
 
-        return new UserDetailsImpl(
+        return new UsersDetailsImpl(
                 user.getId(),
-                user.getUsername(),
+                user.getName(),
                 user.getEmail(),
                 user.getPassword(),
                 authorities);
@@ -82,7 +80,7 @@ public class UserDetailsImpl implements UserDetails {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
-        UserDetailsImpl user = (UserDetailsImpl) o;
+        UsersDetailsImpl user = (UsersDetailsImpl) o;
         return Objects.equals(id, user.id);
     }
 }

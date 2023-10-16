@@ -1,6 +1,8 @@
 package com.saml.movieking.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,8 +30,8 @@ public class UsersController {
     }
 
     @PostMapping(path = "login")
-    public void loginUser(@RequestBody Users user) {
-        userService.loginUser(user);
+    public ResponseEntity<?> loginUser(@RequestBody Users user) {
+        return userService.loginUser(user);
     }
 
     @DeleteMapping(path = "{userId}")

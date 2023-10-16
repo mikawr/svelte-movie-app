@@ -18,7 +18,7 @@ public class UsersConfig {
                     1L,
                     "Sam Smith",
                     "sam.smith@mail.com",
-                    "password1",
+                    "$2y$10$O1ozSKEumtmbN22Ac0A0iOYBSk9NFUWs89tqVmYDim.J3rMPlcOIS",
                     LocalDate.of(2000, Month.JANUARY, 5)
             );
 

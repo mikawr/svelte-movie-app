@@ -1,7 +1,9 @@
-package com.saml.movieking.jwt;
+package com.saml.movieking.security.jwt;
 
 import java.io.IOException;
 
+import com.saml.movieking.user.UsersDetailsServiceImpl;
+import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,14 +19,14 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.bezkoder.springjwt.security.services.UserDetailsServiceImpl;
+
 
 public class AuthTokenFilter extends OncePerRequestFilter {
-    @Autowired
+    @Resource
     private JwtUtils jwtUtils;
 
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
+    @Resource
+    private UsersDetailsServiceImpl userDetailsService;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 

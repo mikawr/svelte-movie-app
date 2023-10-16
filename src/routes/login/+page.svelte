@@ -13,7 +13,8 @@
             password
         }).then((res) => {
             if (res.status == 200) {
-                console.log(res.data)
+                localStorage.setItem("token", token);
+
                 goto("/")
             }
         }).catch((error) => {

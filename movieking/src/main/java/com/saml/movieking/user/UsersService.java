@@ -1,12 +1,22 @@
 package com.saml.movieking.user;
 
+import com.saml.movieking.security.jwt.JwtResponse;
+import com.saml.movieking.security.jwt.JwtUtils;
+import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UsersService {
@@ -16,6 +26,12 @@ public class UsersService {
     public UsersService(UsersRepository usersRepository) {
         this.usersRepository = usersRepository;
     }
+
+    @Resource
+    private AuthenticationManager authenticationManager;
+
+    @Resource
+    private JwtUtils jwtUtils;
 
     public List<Users> getUsers() {
         return usersRepository.findAll();
@@ -31,27 +47,23 @@ public class UsersService {
             usersRepository.save(user);
         }
     }
+    public ResponseEntity<?> loginUser(Users user) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
 
-    public void loginUser(Users user) {
-        Optional<Users> emailOptional = usersRepository.findUserByEmail(user.getEmail());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
 
-        if (emailOptional.isEmpty()) {
-            throw new IllegalStateException("user not found");
-        } else {
-            Optional<Users> passwordOptional = usersRepository.getUserPasswordByEmail(user.getEmail());
+        UsersDetailsImpl userDetails = (UsersDetailsImpl) authentication.getPrincipal();
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
 
-            if (passwordOptional.isEmpty()) {
-                throw new IllegalStateException("password not found");
-            } else {
-                String password = String.valueOf(passwordOptional.get());
-
-                if (password.equals(user.getPassword())) {
-                    System.out.println("Login successful");
-                } else {
-                    throw new IllegalStateException("password incorrect");
-                }
-            }
-        }
+        return ResponseEntity.ok(new JwtResponse(jwt,
+                                                 userDetails.getId(),
+                                                 userDetails.getUsername(),
+                                                 userDetails.getEmail(),
+                                                 roles));
     }
 
     public void deleteUser(Long userId) {
