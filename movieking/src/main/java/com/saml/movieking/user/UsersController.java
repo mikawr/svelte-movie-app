@@ -25,14 +25,12 @@ public class UsersController {
     }
 
     @PostMapping(path = "register")
-    public void registerUser(@RequestBody Users user) {
-        userService.registerUser(user);
+    public ResponseEntity<?> registerUser(@RequestBody Users user) {
+        return userService.registerUser(user);
     }
 
     @PostMapping(path = "login")
-    public ResponseEntity<?> loginUser(@RequestBody Users user) {
-        return userService.loginUser(user);
-    }
+    public ResponseEntity<?> loginUser(@RequestBody Users user) { return userService.loginUser(user); }
 
     @DeleteMapping(path = "{userId}")
     public void deleteUser(@PathVariable("userId") Long userId) {

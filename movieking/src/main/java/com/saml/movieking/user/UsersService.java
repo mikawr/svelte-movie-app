@@ -11,16 +11,21 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @Service
 public class UsersService {
     private final UsersRepository usersRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     public UsersService(UsersRepository usersRepository) {
@@ -37,17 +42,29 @@ public class UsersService {
         return usersRepository.findAll();
     }
 
-    public void registerUser(Users user) {
-        Optional<Users> nameOptional = usersRepository.findUserByName(user.getName());
+    public ResponseEntity<?> registerUser(Users user) {
+        // Check if entered email already exists.
         Optional<Users> emailOptional = usersRepository.findUserByEmail(user.getEmail());
-
-        if (nameOptional.isPresent() || emailOptional.isPresent()) {
-            throw new IllegalStateException("username or email taken");
-        } else {
-            usersRepository.save(user);
+        if (emailOptional.isPresent()) {
+            return ResponseEntity.badRequest().body("email taken");
         }
+        // Check if entered name already exists.
+        Optional<Users> nameOptional = usersRepository.findUserByName(user.getName());
+        if (nameOptional.isPresent()) {
+            return ResponseEntity.badRequest().body("name taken");
+        }
+
+        Users newUser = new Users(user.getName(), user.getEmail(), passwordEncoder.encode(user.getPassword()));
+        usersRepository.save(newUser);
+
+        return ResponseEntity.ok("User registered successfully!");
     }
+
     public ResponseEntity<?> loginUser(Users user) {
+
+        System.out.println(user.getPassword());
+        System.out.println(passwordEncoder.encode(user.getPassword()));
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
 
@@ -58,6 +75,8 @@ public class UsersService {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
+
+        System.out.println(jwt);
 
         return ResponseEntity.ok(new JwtResponse(jwt,
                                                  userDetails.getId(),

@@ -23,9 +23,9 @@ public class UsersConfig {
             );
 
             Users thomas = new Users(
-                    "Thomas Thompson",
-                    "thomas.thompson@mail.com",
-                    "password2",
+                    "Mika Werner",
+                    "mika@mail.com",
+                    "$2a$10$OF4p5ActaUreKv5tHptuO.FyNQoh5yN.N7/DyY1xqAyP/5Oe8ZxBm",
                     LocalDate.of(2002, Month.DECEMBER, 10)
             );
 
