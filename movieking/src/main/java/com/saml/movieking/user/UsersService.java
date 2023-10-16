@@ -5,6 +5,7 @@ import com.saml.movieking.security.jwt.JwtUtils;
 import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,12 +14,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class UsersService {
@@ -61,10 +59,6 @@ public class UsersService {
     }
 
     public ResponseEntity<?> loginUser(Users user) {
-
-        System.out.println(user.getPassword());
-        System.out.println(passwordEncoder.encode(user.getPassword()));
-
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
 
@@ -76,13 +70,17 @@ public class UsersService {
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
-        System.out.println(jwt);
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders
+                .add(HttpHeaders.SET_COOKIE, "token=" + jwt + "; Path=/; HttpOnly; SameSite=None; Secure");
 
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                                                 userDetails.getId(),
-                                                 userDetails.getUsername(),
-                                                 userDetails.getEmail(),
-                                                 roles));
+        return ResponseEntity.ok()
+                .headers(responseHeaders)
+                .body(new JwtResponse(jwt,
+                        userDetails.getId(),
+                        userDetails.getUsername(),
+                        userDetails.getEmail(),
+                        roles));
     }
 
     public void deleteUser(Long userId) {
