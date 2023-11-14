@@ -83,6 +83,11 @@ public class UsersService {
                         roles));
     }
 
+    public String logoutUser(Users user) {
+        // perform logout
+        return "redirect:/";
+    }
+
     public void deleteUser(Long userId) {
         boolean exists = usersRepository.existsById(userId);
         if (!exists) {

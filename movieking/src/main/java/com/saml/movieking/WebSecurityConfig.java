@@ -8,8 +8,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -59,16 +61,16 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-
-
         http.csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/api/v1/users/login**").permitAll()
+                        auth
+                                .requestMatchers("/members").hasRole("MEMBER")
+                                .requestMatchers("/movies").hasRole("MEMBER")
+                                .requestMatchers("/api/v1/users/login**").permitAll()
                                 .requestMatchers("/api/v1/users/register**").permitAll()
                                 .requestMatchers("/api/v1/users**").permitAll()
-                                .requestMatchers("/movies").hasAuthority("MEMBER")
                                 .anyRequest().authenticated()
                 );
 
@@ -77,5 +79,18 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Autowired
+    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth
+                .ldapAuthentication()
+                .userDnPatterns("cn={0}")
+                .contextSource()
+                .url("ldap://ldap.movieking.com/dc=movieking,dc=com")
+                .and()
+                .passwordCompare()
+                .passwordEncoder(new BCryptPasswordEncoder())
+                .passwordAttribute("password");
     }
 }

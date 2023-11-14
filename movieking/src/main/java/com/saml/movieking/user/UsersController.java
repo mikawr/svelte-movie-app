@@ -32,6 +32,9 @@ public class UsersController {
     @PostMapping(path = "login")
     public ResponseEntity<?> loginUser(@RequestBody Users user) { return userService.loginUser(user); }
 
+    @PostMapping(path = "logout")
+    public String logoutUser(@RequestBody Users user) { return userService.logoutUser(user); }
+
     @DeleteMapping(path = "{userId}")
     public void deleteUser(@PathVariable("userId") Long userId) {
         userService.deleteUser(userId);
