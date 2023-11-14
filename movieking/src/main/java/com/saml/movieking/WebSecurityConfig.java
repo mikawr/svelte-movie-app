@@ -19,11 +19,12 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity()
 // (securedEnabled = true,
 // jsr250Enabled = true,
 // prePostEnabled = true) // by default
 public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
+
     @Autowired
     UsersDetailsServiceImpl userDetailsService;
 
@@ -57,6 +58,9 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+
+
         http.csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -64,6 +68,7 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
                         auth.requestMatchers("/api/v1/users/login**").permitAll()
                                 .requestMatchers("/api/v1/users/register**").permitAll()
                                 .requestMatchers("/api/v1/users**").permitAll()
+                                .requestMatchers("/movies").hasAuthority("MEMBER")
                                 .anyRequest().authenticated()
                 );
 

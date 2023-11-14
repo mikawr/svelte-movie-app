@@ -13,8 +13,11 @@
             password
         }).then((res) => {
             if (res.status == 200) {
-                console.log(res)
-                goto("/")
+                console.log(res.data);
+
+                document.cookie(`token=${res.data.token}`);
+            
+                goto("/");
             }
         }).catch((error) => {
             showError.set(true);

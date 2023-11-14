@@ -1,6 +1,5 @@
 <div
     class="hero min-h-screen"
-    style="background-image: url(src/lib/assets/images/cinema.png);"
 >
     <div class="hero-overlay bg-opacity-60" />
     <div class="hero-content text-center text-neutral-content">
@@ -12,6 +11,10 @@
 </div>
 
 <style>
+    .hero {
+        background-image: url(src/lib/assets/images/cinema.png);
+    }
+
     p {
         border-right: solid 3px #fff;
         font-size: 28px;
