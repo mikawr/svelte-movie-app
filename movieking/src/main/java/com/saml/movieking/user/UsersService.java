@@ -59,6 +59,7 @@ public class UsersService {
     }
 
     public ResponseEntity<?> loginUser(Users user) {
+        System.out.println(user);
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
 

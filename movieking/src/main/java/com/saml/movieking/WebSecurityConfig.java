@@ -3,6 +3,7 @@ package com.saml.movieking;
 import com.saml.movieking.security.jwt.AuthEntryPointJwt;
 import com.saml.movieking.security.jwt.AuthTokenFilter;
 import com.saml.movieking.user.UsersDetailsServiceImpl;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableMethodSecurity()
+@Log4j2
 // (securedEnabled = true,
 // jsr250Enabled = true,
 // prePostEnabled = true) // by default
@@ -60,7 +62,7 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
+        System.out.println("Arrived at filterChain");
         http.csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -83,14 +85,15 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 
     @Autowired
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
+        log.info("LDAP");
         auth
                 .ldapAuthentication()
-                .userDnPatterns("cn={0}")
-                .contextSource()
-                .url("ldap://ldap.movieking.com/dc=movieking,dc=com")
-                .and()
-                .passwordCompare()
-                .passwordEncoder(new BCryptPasswordEncoder())
-                .passwordAttribute("password");
+                    .userDnPatterns("cn={0}")
+                    .contextSource()
+                        .url("ldap://ldap.movieking.com:389/dc=movieking,dc=com")
+                        .and()
+                    .passwordCompare()
+                        .passwordEncoder(new BCryptPasswordEncoder())
+                        .passwordAttribute("userPassword");
     }
 }

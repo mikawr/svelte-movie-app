@@ -30,7 +30,7 @@
         </p>
     {/if}
     <form on:submit|preventDefault={handleSubmit} class="flex flex-col items-center">
-        <input type="email" placeholder="Email" autocomplete="email" bind:value={email} class="p-2 mb-2 border rounded" required />
+        <input type="text" placeholder="Email" bind:value={email} class="p-2 mb-2 border rounded" required />
         <input type="password" placeholder="Password" bind:value={password} class="p-2 mb-2 border rounded" required />
         <div class="pt-5">
             <button type="submit" class="btn btn-neutral btn-xs">Sign In</button>
