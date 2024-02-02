@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
@@ -59,14 +60,13 @@ public class UsersService {
     }
 
     public ResponseEntity<?> loginUser(Users user) {
-        System.out.println(user);
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
 
-        UsersDetailsImpl userDetails = (UsersDetailsImpl) authentication.getPrincipal();
+        LdapUserDetailsImpl userDetails = (LdapUserDetailsImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
@@ -78,9 +78,9 @@ public class UsersService {
         return ResponseEntity.ok()
                 .headers(responseHeaders)
                 .body(new JwtResponse(jwt,
-                        userDetails.getId(),
+                        0L,
                         userDetails.getUsername(),
-                        userDetails.getEmail(),
+                        userDetails.getDn(),
                         roles));
     }
 

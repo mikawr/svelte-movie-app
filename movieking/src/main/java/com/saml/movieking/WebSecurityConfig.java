@@ -21,6 +21,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import org.springframework.security.crypto.password.LdapShaPasswordEncoder;
+
+
 @Configuration
 @EnableMethodSecurity()
 @Log4j2
@@ -62,18 +65,15 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        System.out.println("Arrived at filterChain");
         http.csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth
-                                .requestMatchers("/members").hasRole("MEMBER")
-                                .requestMatchers("/movies").hasRole("MEMBER")
-                                .requestMatchers("/api/v1/users/login**").permitAll()
-                                .requestMatchers("/api/v1/users/register**").permitAll()
-                                .requestMatchers("/api/v1/users**").permitAll()
-                                .anyRequest().authenticated()
+                                .requestMatchers("/members").authenticated()
+                                .requestMatchers("/movies").authenticated()
+                                .requestMatchers("/api/v1/users**").anonymous()
+                                .anyRequest().permitAll()
                 );
 
         http.authenticationProvider(authenticationProvider());
@@ -85,15 +85,16 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 
     @Autowired
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
-        log.info("LDAP");
         auth
                 .ldapAuthentication()
                     .userDnPatterns("cn={0}")
                     .contextSource()
                         .url("ldap://ldap.movieking.com:389/dc=movieking,dc=com")
-                        .and()
+                        .managerDn("cn=admin,dc=movieking,dc=com")  // Bind DN with sufficient permissions
+                        .managerPassword("admin_pass")
+                .and()
                     .passwordCompare()
-                        .passwordEncoder(new BCryptPasswordEncoder())
+                        .passwordEncoder(new LdapShaPasswordEncoder())
                         .passwordAttribute("userPassword");
     }
 }
