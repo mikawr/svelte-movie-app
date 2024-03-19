@@ -4,13 +4,10 @@ import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Getter
@@ -19,9 +16,7 @@ public class UsersDetailsImpl implements UserDetails {
     private static final long serialVersionUID = 1L;
 
     private final Long id;
-
     private final String username;
-
     private final String email;
 
     @JsonIgnore

@@ -1,6 +1,8 @@
 package com.saml.movieking.user;
 
+import org.opensaml.soap.wssecurity.Username;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,8 +19,7 @@ public class UsersDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Users user = usersRepository.findUserByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
-
+        
         return UsersDetailsImpl.build(user);
     }
-
 }

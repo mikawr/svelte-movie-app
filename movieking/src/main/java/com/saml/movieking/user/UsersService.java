@@ -1,12 +1,13 @@
 package com.saml.movieking.user;
 
+import com.google.common.hash.Hashing;
 import com.saml.movieking.security.jwt.JwtResponse;
 import com.saml.movieking.security.jwt.JwtUtils;
 import jakarta.annotation.Resource;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ldap.support.LdapNameBuilder;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,21 +16,19 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl;
 import org.springframework.stereotype.Service;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.ldap.core.DirContextAdapter;
+import org.springframework.ldap.core.LdapTemplate;
+import javax.naming.Name;
 
 @Service
 public class UsersService {
-    private final UsersRepository usersRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UsersService(UsersRepository usersRepository) {
-        this.usersRepository = usersRepository;
-    }
+    private LdapTemplate ldapTemplate;
 
     @Resource
     private AuthenticationManager authenticationManager;
@@ -37,25 +36,22 @@ public class UsersService {
     @Resource
     private JwtUtils jwtUtils;
 
-    public List<Users> getUsers() {
-        return usersRepository.findAll();
+    public ResponseEntity<?> registerUser(Users user) {
+        return registerUser(user, passwordEncoder);
     }
 
-    public ResponseEntity<?> registerUser(Users user) {
-        // Check if entered email already exists.
-        Optional<Users> emailOptional = usersRepository.findUserByEmail(user.getEmail());
-        if (emailOptional.isPresent()) {
-            return ResponseEntity.badRequest().body("email taken");
-        }
-        // Check if entered name already exists.
-        Optional<Users> nameOptional = usersRepository.findUserByName(user.getName());
-        if (nameOptional.isPresent()) {
-            return ResponseEntity.badRequest().body("name taken");
-        }
+    public ResponseEntity<?> registerUser(Users user, PasswordEncoder passwordEncoder) {
+        Name dn = /*(Name)*/ LdapNameBuilder.newInstance().add("cn", user.getName()).build();
+        DirContextAdapter context = new DirContextAdapter(String.valueOf(dn));
 
-        Users newUser = new Users(user.getName(), user.getEmail(), passwordEncoder.encode(user.getPassword()));
-        usersRepository.save(newUser);
+        context.setAttributeValues("objectClass", new String[]{"simpleSecurityObject", "organizationalPerson"});
+        context.setAttributeValue("cn", user.getName());
+        context.setAttributeValue("sn", user.getName());
+        context.setAttributeValue("userPassword", passwordEncoder.encode(user.getPassword()));
 
+        //System.out.println("\n"+ user.getPassword() + " - " + passwordEncoder.encode(user.getPassword()) + "\n");
+
+        ldapTemplate.bind(context);
         return ResponseEntity.ok("User registered successfully!");
     }
 
@@ -85,50 +81,6 @@ public class UsersService {
     }
 
     public String logoutUser(Users user) {
-        // perform logout
         return "redirect:/";
-    }
-
-    public void deleteUser(Long userId) {
-        boolean exists = usersRepository.existsById(userId);
-        if (!exists) {
-            throw new IllegalStateException(
-                    "user with id " + userId + " does not exists"
-            );
-        }
-
-        usersRepository.deleteById(userId);
-    }
-
-    @Transactional
-    public void updateUser(Long userId,
-                           String name,
-                           String email,
-                           String password,
-                           String dob) {
-        Users user = usersRepository.findById(userId)
-                .orElseThrow(() -> new IllegalStateException(
-                        "user with id " + userId + " does not exists"
-                ));
-
-        if (name != null && !name.isEmpty() && !name.equals(user.getName())) {
-            user.setName(name);
-        }
-
-        if (email != null && !email.isEmpty() && !email.equals(user.getEmail())) {
-            Optional<Users> userOptional = usersRepository.findUserByEmail(email);
-            if (userOptional.isPresent()) {
-                throw new IllegalStateException("email taken");
-            }
-            user.setEmail(email);
-        }
-
-        if (password != null && !password.isEmpty() && !password.equals(user.getPassword())) {
-            user.setPassword(password);
-        }
-
-        if (dob != null && !dob.isEmpty()) {
-            user.setDob(LocalDate.parse(dob));
-        }
     }
 }

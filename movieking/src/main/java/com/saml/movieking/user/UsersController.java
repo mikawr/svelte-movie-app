@@ -19,10 +19,13 @@ public class UsersController {
         this.userService = userService;
     }
 
+    /*
     @GetMapping
     public List<Users> getUsers() {
         return userService.getUsers();
     }
+
+     */
 
     @PostMapping(path = "register")
     public ResponseEntity<?> registerUser(@RequestBody Users user) {
@@ -35,11 +38,11 @@ public class UsersController {
     @PostMapping(path = "logout")
     public String logoutUser(@RequestBody Users user) { return userService.logoutUser(user); }
 
+    /*
     @DeleteMapping(path = "{userId}")
     public void deleteUser(@PathVariable("userId") Long userId) {
         userService.deleteUser(userId);
     }
-
     @PutMapping(path = "{userId}")
     public void updateUser(
             @PathVariable("userId") Long userId,
@@ -50,4 +53,5 @@ public class UsersController {
     ) {
         userService.updateUser(userId, name, email, password, dob);
     }
+     */
 }

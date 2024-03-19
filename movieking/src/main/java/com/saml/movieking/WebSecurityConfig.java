@@ -9,11 +9,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,22 +22,35 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import org.springframework.security.crypto.password.LdapShaPasswordEncoder;
-
-
 @Configuration
 @EnableMethodSecurity()
+@EnableWebSecurity
 @Log4j2
 // (securedEnabled = true,
 // jsr250Enabled = true,
 // prePostEnabled = true) // by default
-public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig {
 
     @Autowired
-    UsersDetailsServiceImpl userDetailsService;
+    private UsersDetailsServiceImpl userDetailsService;
 
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
+
+    @Autowired
+    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth
+                .ldapAuthentication()
+                .userDnPatterns("cn={0}")
+                .contextSource()
+                .url("ldap://ldap.movieking.com:389/dc=movieking,dc=com")
+                .managerDn("cn=admin,dc=movieking,dc=com")
+                .managerPassword("admin_pass")
+                .and()
+                .passwordCompare()
+                .passwordEncoder(new BCryptPasswordEncoder())
+                .passwordAttribute("userPassword");
+    }
 
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
@@ -46,10 +60,8 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
-
         return authProvider;
     }
 
@@ -70,31 +82,14 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth
-                                .requestMatchers("/members").authenticated()
-                                .requestMatchers("/movies").authenticated()
-                                .requestMatchers("/api/v1/users**").anonymous()
-                                .anyRequest().permitAll()
-                );
-
+                                .requestMatchers("/api/v1/users/**").permitAll()
+                                .requestMatchers("/movies", "/members").authenticated()
+                                .anyRequest().permitAll())
+                .formLogin(Customizer.withDefaults())
+                .httpBasic(Customizer.withDefaults());
         http.authenticationProvider(authenticationProvider());
-
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-    }
-
-    @Autowired
-    public void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .ldapAuthentication()
-                    .userDnPatterns("cn={0}")
-                    .contextSource()
-                        .url("ldap://ldap.movieking.com:389/dc=movieking,dc=com")
-                        .managerDn("cn=admin,dc=movieking,dc=com")  // Bind DN with sufficient permissions
-                        .managerPassword("admin_pass")
-                .and()
-                    .passwordCompare()
-                        .passwordEncoder(new LdapShaPasswordEncoder())
-                        .passwordAttribute("userPassword");
     }
 }
